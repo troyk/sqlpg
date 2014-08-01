@@ -133,7 +133,6 @@ func (db *Tx) GetString(query string, args ...interface{}) (result string, err e
 }
 
 func Exec(db goDriver, query string, args ...interface{}) (sql.Result, error) {
-	log.Println("EXEC: ", query, args)
 	return db.Exec(query, args...)
 }
 
@@ -169,7 +168,6 @@ func GetInt(db Queryer, query string, args ...interface{}) (result int64, err er
 
 func GetString(db Queryer, query string, args ...interface{}) (result string, err error) {
 	err = db.QueryRow(query, args...).Scan(&result)
-	//log.Println("GetString", query, args, result, err)
 	if err == sql.ErrNoRows {
 		return result, nil
 	}
@@ -181,43 +179,5 @@ func Open(dataSourceName string) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	//templates := &SqlTemplate{Template: template.New("schema")}
 	return &DB{DB: pg}, nil
 }
-
-//with ad as (
-//  select ads.* from ads where ads.id = '2ec72d3f-4665-461a-841d-faeee4e199c6'
-//),
-//business as (
-//  select b.*,
-//  (select json_agg(c) from categories c where c.id IN (select bc.category_id from businesses_categories bc where bc.business_id = b.id)) as categories
-//  from businesses b join ad on b.id=ad.business_id
-//) select to_json(row) FROM (select ad.*, business from ad left join business on ad.business_id = business.id) row;
-
-//with ad as (
-//  select ads.* from ads where ads.id = '2ec72d3f-4665-461a-841d-faeee4e199c6'
-//),
-//business as (
-//  select b.*,
-//  (select json_agg(c) from categories c where c.id IN (select bc.category_id from businesses_categories bc where bc.business_id = b.id)) as categories
-//  from businesses b join ad on b.id=ad.business_id
-//) select to_json(row) FROM (select ad.* FROM ad) row;
-
-//select to_json(row) from (
-//  select ads.*,
-//  (select business from (
-//    select b.*,
-//    (select json_agg(c) from categories c where c.id IN (select bc.category_id FROM businesses_categories bc where bc.business_id = b.id )) as categories
-//    from businesses b where b.id=ads.business_id
-//  ) business)
-//  from ads
-//  where ads.id = '2ec72d3f-4665-461a-841d-faeee4e199c6'
-//) row;
-
-//select to_json(row) from (
-//  select ads.*,
-//  (select ROW(json_agg(b), json_agg(c)) from businesses b join businesses_categories bc on b.id = bc.business_id join categories c on c.id = bc.category_id where b.id=ads.business_id)
-//  --,(select json_agg(categories) from categories where false AND categories.id IN (select bc.category_id FROM businesses_categories bc where bc.business_id = businesses.id )) as categories
-//  from ads
-//  where ads.id = '865d35a2-d038-4558-94dc-adc73ffb3210')
-// row;
