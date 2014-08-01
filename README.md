@@ -35,7 +35,7 @@ and issues a pull request.
 - [x] Query helpers, GetInt, GetString and Get(scanTo interface{} -- via json)
 - [ ] Custom types to support timestamptz, hstore, point and other pg awesomeness
 - [ ] Advanced query helpers GetSlice, GetMap
-- [ ] Select Query Helper (in progress, converts $1,$2 and sqlbuilder)
+- [x] Select Query Helper (in progress, converts $1,$2 and sqlbuilder)
 - [ ] Update Query Helper
 - [ ] Insert Query Helper
 - [ ] Prepared statement cache
