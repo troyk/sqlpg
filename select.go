@@ -44,6 +44,11 @@ func SelectFrom(sqlFrom string) SelectFromStmt {
 	return SelectFromStmt{selectSql: sqlFrom}
 }
 
+// Begins a SelectFromStmt with the Where clause
+func SelectWhere(partial string, args ...interface{}) SelectFromStmt {
+	return SelectFromStmt{}.Where(partial, args...)
+}
+
 // SelectStmt is a SQL string being built
 type SelectStmt struct {
 	selects []component
@@ -166,7 +171,14 @@ func (s SelectStmt) ToSql(args ...interface{}) (string, []interface{}) {
 // SelectStmt is like SelectStmt only select, from and join are static strings
 type SelectFromStmt struct {
 	selectSql string
+	format    string
 	stmt      SelectStmt
+}
+
+// Sets the selectSql
+func (s SelectFromStmt) Select(selectSql string) SelectFromStmt {
+	s.selectSql = selectSql
+	return s
 }
 
 // Where adds a WHERE stanza, wrapped in brackets and joined by AND
@@ -199,6 +211,20 @@ func (s SelectFromStmt) Limit(limit int) SelectFromStmt {
 	return s
 }
 
+// Only sets the limit if limit is not already set
+func (s SelectFromStmt) LimitOr(limit int) SelectFromStmt {
+	if s.stmt.limit == 0 {
+		return s.Limit(limit)
+	}
+	return s
+}
+
+// Sprintf format string used when producing sql string output
+func (s SelectFromStmt) Format(format string) SelectFromStmt {
+	s.format = format
+	return s
+}
+
 func (s SelectFromStmt) String(args ...interface{}) string {
 	sql, _ := s.ToSql(args...)
 	return sql
@@ -212,7 +238,11 @@ func (s SelectFromStmt) Args(args ...interface{}) []interface{} {
 // SQL joins your stanzas, returning the composed SQL.
 func (s SelectFromStmt) ToSql(args ...interface{}) (string, []interface{}) {
 	sql, allArgs := s.stmt.ToSql(args...)
-	return s.selectSql + sql, allArgs
+	sql = s.selectSql + sql
+	if s.format != "" {
+		sql = fmt.Sprintf(s.format, sql)
+	}
+	return sql, allArgs
 }
 
 var reDollarPosition = regexp.MustCompile(`\$\d{1,4}\b`)
