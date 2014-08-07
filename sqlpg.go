@@ -15,9 +15,7 @@ import (
 // Public driver with enhanched methods
 type Driver interface {
 	// enhanced
-	Get(scan interface{}, query string, args ...interface{}) error
-	GetInt(query string, args ...interface{}) (result int64, err error)
-	GetString(query string, args ...interface{}) (result string, err error)
+	Getter
 	Rollback() error
 
 	// Go
@@ -36,6 +34,12 @@ type goDriver interface {
 type Queryer interface {
 	Query(query string, args ...interface{}) (*sql.Rows, error)
 	QueryRow(query string, args ...interface{}) *sql.Row
+}
+
+type Getter interface {
+	Get(scan interface{}, query string, args ...interface{}) error
+	GetInt(query string, args ...interface{}) (result int64, err error)
+	GetString(query string, args ...interface{}) (result string, err error)
 }
 
 // Wrap sql.DB

@@ -38,6 +38,7 @@ and issues a pull request.
 - [x] Select Query Helper (in progress, converts $1,$2 and sqlbuilder)
 - [ ] Update Query Helper
 - [ ] Insert Query Helper
+- [x] Stored Procedure Helper
 - [ ] Prepared statement cache
 - [ ] Logging
 - [ ] AutoExplain, PgStatStatment profile query usage/performance in realtime
