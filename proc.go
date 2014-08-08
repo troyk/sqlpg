@@ -63,7 +63,11 @@ func (p ProcStmt) String(values ...interface{}) string {
 }
 
 func (p ProcStmt) ToSql(values ...interface{}) (string, []interface{}) {
-	return ReplaceNameHolders(p.sql, p.params, values...)
+	sql, values := ReplaceNameHolders(p.sql, p.params, values...)
+	if p.format != "" {
+		sql = fmt.Sprintf(p.format, sql)
+	}
+	return sql, values
 }
 
 func (p ProcStmt) Get(db Getter, scan interface{}) error {
