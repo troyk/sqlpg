@@ -1,3 +1,7 @@
+```
+this is the toofar branch, decided to pursue a different approach and stick more to the go sql spec
+```
+
 #sqlpg
 
 sqlpg is a library which provides a set of extensions on go's standard
@@ -43,3 +47,4 @@ and issues a pull request.
 - [ ] Logging
 - [ ] AutoExplain, PgStatStatment profile query usage/performance in realtime
 - [ ] Fully tested
+
