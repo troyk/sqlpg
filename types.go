@@ -1,6 +1,7 @@
 package sqlpg
 
 import (
+	"database/sql/driver"
 	"encoding/json"
 	"time"
 )
@@ -35,8 +36,15 @@ func (pgt *Time) Scan(src interface{}) error {
 		return nil
 	}
 	pgt.Time = src.(time.Time)
-
 	return nil
+}
+
+// Value implements the driver Valuer interface.
+func (pgt Time) Value() (driver.Value, error) {
+	if pgt.IsZero() {
+		return nil, nil
+	}
+	return pgt.Time, nil
 }
 
 // uuid type
