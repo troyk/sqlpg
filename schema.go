@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/troyk/sqlx/reflectx"
+	"github.com/jmoiron/sqlx/reflectx"
 )
 
 type columnSchema struct {
