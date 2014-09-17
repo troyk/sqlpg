@@ -10,6 +10,10 @@ import (
 )
 
 // Time type to work with pg's milliseconds json types
+// postgres changed their json date formatting as of 9.4beta2 to not suck
+// >= 9.4b2 "2014-09-03T23:31:27.344959+00:00"
+// <  9.4b2 "2014-09-16 21:25:25.43576-07"
+
 const pgJsonTimeLayout = "2006-01-02 15:04:05.999999999-07"
 
 type Time struct {
@@ -21,15 +25,21 @@ func (pgt *Time) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &s); err != nil {
 		return err
 	}
+	var (
+		t   time.Time
+		err error
+	)
 	if s == "" {
-		pgt.Time = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
+		t = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
+	} else if strings.Index(s, "T") > 0 {
+		t, err = time.Parse(time.RFC3339Nano, s)
 	} else {
-		t, err := time.Parse(pgJsonTimeLayout, s)
-		if err != nil {
-			return err
-		}
-		pgt.Time = t
+		t, err = time.Parse(pgJsonTimeLayout, s)
 	}
+	if err != nil {
+		return err
+	}
+	pgt.Time = t
 	return nil
 }
 
