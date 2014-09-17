@@ -1,8 +1,11 @@
 package sqlpg
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"encoding/json"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -45,6 +48,54 @@ func (pgt Time) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return pgt.Time, nil
+}
+
+// StringSlice is the go equiv of text[]
+type StringSlice []string
+
+func (s StringSlice) Value() (driver.Value, error) {
+	if s == nil {
+		return nil, nil
+	}
+	var (
+		buffer bytes.Buffer
+		last   = len(s) - 1
+	)
+	buffer.WriteString("{")
+	for i, str := range s {
+		if i == last {
+			buffer.WriteString("'" + strings.Replace(str, `'`, `\'`, -1) + "'")
+		} else {
+			buffer.WriteString("'" + strings.Replace(str, `'`, `\'`, -1) + "',")
+		}
+
+	}
+	buffer.WriteString("}")
+	return buffer.String(), nil
+}
+
+// StringSlice is the go equiv of int[]
+type IntSlice []int
+
+func (s IntSlice) Value() (driver.Value, error) {
+	if s == nil {
+		return nil, nil
+	}
+	var (
+		buffer bytes.Buffer
+		last   = len(s) - 1
+	)
+	buffer.WriteString("{")
+	for i, val := range s {
+		if i == last {
+			buffer.WriteString(strconv.Itoa(val))
+		} else {
+			buffer.WriteString(strconv.Itoa(val) + ",")
+		}
+
+	}
+	buffer.WriteString("}")
+	return buffer.String(), nil
 }
 
 // uuid type
