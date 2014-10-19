@@ -25,7 +25,10 @@ type Tx struct {
 type Driver interface {
 	Exec(query string, args ...interface{}) (sql.Result, error)
 	Query(query string, args ...interface{}) (*sql.Rows, error)
+	QueryRow(query string, args ...interface{}) *sql.Row
 	GetJSON(dest interface{}, query string, args ...interface{}) error
+	ProcNamedJSON(dest interface{}, proc string, params map[string]interface{}) error
+	ProcNamedString(proc string, params map[string]interface{}) (string, error)
 	Insert(table string, data interface{}) error
 }
 
@@ -56,6 +59,20 @@ func (db *DB) GetJSON(dest interface{}, query string, args ...interface{}) error
 }
 func (tx *Tx) GetJSON(dest interface{}, query string, args ...interface{}) error {
 	return GetJSON(tx, dest, query, args...)
+}
+
+func (db *DB) ProcNamedJSON(dest interface{}, proc string, params map[string]interface{}) error {
+	return ProcNamedJSON(db, dest, proc, params)
+}
+func (tx *Tx) ProcNamedJSON(dest interface{}, proc string, params map[string]interface{}) error {
+	return ProcNamedJSON(tx, dest, proc, params)
+}
+
+func (db *DB) ProcNamedString(proc string, params map[string]interface{}) (string, error) {
+	return ProcNamedString(db, proc, params)
+}
+func (tx *Tx) ProcNamedString(proc string, params map[string]interface{}) (string, error) {
+	return ProcNamedString(tx, proc, params)
 }
 
 func Open(url string) (*DB, error) {
@@ -89,11 +106,20 @@ func MustOpen(url string) *DB {
 }
 
 func GetJSON(q sqlx.Queryer, dest interface{}, query string, args ...interface{}) error {
-	var data string
+	var data sql.NullString
 	if err := q.QueryRowx(query, args...).Scan(&data); err != nil {
 		return err
 	}
-	return json.Unmarshal([]byte(data), dest)
+	if data.Valid == false || data.String == "" {
+		return sql.ErrNoRows
+	}
+	return json.Unmarshal([]byte(data.String), dest)
+}
+
+func Get(q *DB, dest interface{}, query string, args ...interface{}) error {
+	return q.Get(dest, query, args...)
+	// r := q.QueryRowx(query, args...)
+	// return r.scanAny(dest, false)
 }
 
 func Insert(db Driver, table string, data interface{}) error {
